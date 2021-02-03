@@ -1165,4 +1165,12 @@ config MACSMC_POWER
 
 	  Say Y or M here if you have an Apple Silicon based Mac.
 
+config BATTERY_QCOM_FG
+	tristate "Qualcomm PMIC fuel gauge driver"
+	depends on MFD_SPMI_PMIC
+	help
+	  Say Y here to enable the Qualcomm PMIC Fuel Gauge driver. This
+	  adds support for battery fuel gauging and state of charge of
+	  battery connected to the fuel gauge.
+
 endif # POWER_SUPPLY
