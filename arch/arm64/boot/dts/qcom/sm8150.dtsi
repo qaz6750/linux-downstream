@@ -1698,6 +1698,8 @@
 				reg = <0 0x00c8c000 0 0x4000>;
 				clocks = <&gcc GCC_QUPV3_WRAP2_S3_CLK>;
 				clock-names = "se";
+				pinctrl-names = "default";
+				pinctrl-0 = <&qup_uart13_default>;
 				interrupts = <GIC_SPI 585 IRQ_TYPE_LEVEL_HIGH>;
 				status = "disabled";
 			};
@@ -2600,6 +2602,13 @@
 				pins = "gpio43", "gpio44", "gpio45", "gpio46";
 				function = "qup13";
 				drive-strength = <6>;
+				bias-disable;
+			};
+
+			qup_uart13_default: qup-uart13-default-state {
+				pins = "gpio43", "gpio44", "gpio45", "gpio46";
+				function = "qup13";
+				drive-strength = <2>;
 				bias-disable;
 			};
 
