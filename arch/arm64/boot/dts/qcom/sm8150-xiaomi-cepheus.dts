@@ -45,7 +45,6 @@
 
 	aliases {
 		serial0 = &uart2;
-		display0 = &framebuffer;
 		hsuart0 = &uart13;
 		wifi0 = &wifi;
 	};
@@ -55,14 +54,14 @@
 		#size-cells = <2>;
 		ranges;
 
-		framebuffer: framebuffer@9c000000 {
+		display0: framebuffer@9c000000 {
 			compatible = "simple-framebuffer";
 			reg = <0 0x9c000000 0 0x2400000>;
-			status = "okay";
 			width = <1080>;
 			height = <2340>;
 			stride = <(1080 * 4)>;
 			format = "a8r8g8b8";
+			status = "disabled";
 			clocks =	<&gcc GCC_DISP_HF_AXI_CLK>,
 						<&gcc GCC_DISP_SF_AXI_CLK>;
 		};
@@ -142,10 +141,11 @@
 			reg = <0x0 0x99100000 0x0 0x1400000>;
 		};
 
-		cont_splash_mem: memory@9c000000 {
-			reg = <0x0 0x9c000000 0x0 0x2400000>;
-			no-map;
-		};
+		//cont_splash_region@9c000000 {
+		//	reg = <0x0 0x9c000000 0x0 0x2400000>;
+		//	label = "cont_splash_region";
+		//	no-map;
+		//};
 
 		cdsp_sec_mem: memory@a4c00000 {
 			reg = <0x0 0xa4c00000 0x0 0x3c00000>;
