@@ -49,6 +49,16 @@
 		wifi0 = &wifi;
 	};
 
+	memory {
+		ddr_device_type = <0x08>;
+		device_type = "memory";
+		#address-cells = <2>;
+		#size-cells = <2>;
+		reg = 	<0x0 0x80000000 0x0 0x3cc00000>,
+				<0x1 0x40000000 0x0 0xc0000000>,
+				<0x0 0xc0000000 0x0 0x80000000>;
+	};
+
 	chosen {
 		#address-cells = <2>;
 		#size-cells = <2>;
