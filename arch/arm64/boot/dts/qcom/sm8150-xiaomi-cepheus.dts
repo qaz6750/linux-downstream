@@ -672,6 +672,19 @@
 	};
 };
 
+&pm8150_rtc {
+	nvmem-cells = <&rtc_offset>;
+	nvmem-cell-names = "offset";
+	status = "okay";
+};
+
+&pm8150_sdam_2 {
+	status = "okay";
+	rtc_offset: rtc-offset@bc {
+		reg = <0xbc 0x4>;
+	};
+};
+
 &pm8150b_fg {
 	status = "okay";
 	monitored-battery = <&battery>;
