@@ -584,6 +584,9 @@ static int smb_get_prop_health(struct smb_chip *chip, int *val)
 		return smb2_get_prop_health(chip, val);
 	case SMB5:
 		return smb5_get_prop_health(chip, val);
+	default:
+		dev_err(chip->dev, "Unsupported SMB chip generation\n");
+		return -EINVAL;
 	}
 }
 
