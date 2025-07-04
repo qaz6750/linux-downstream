@@ -17,6 +17,7 @@
 #include <drm/drm_mipi_dsi.h>
 #include <drm/drm_modes.h>
 #include <drm/drm_panel.h>
+#include <drm/drm_probe_helper.h>
 
 struct samsung_ea8076_f1mp {
 	struct drm_panel panel;
@@ -43,86 +44,111 @@ static void samsung_ea8076_f1mp_reset(struct samsung_ea8076_f1mp *ctx)
 static int samsung_ea8076_f1mp_on(struct samsung_ea8076_f1mp *ctx)
 {
 	struct mipi_dsi_device *dsi = ctx->dsi;
-	struct device *dev = &dsi->dev;
-	int ret;
+	struct mipi_dsi_multi_context dsi_ctx = { .dsi = dsi };
 
-	ret = mipi_dsi_dcs_exit_sleep_mode(dsi);
-	if (ret < 0) {
-		dev_err(dev, "Failed to exit sleep mode: %d\n", ret);
-		return ret;
-	}
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0x5a, 0x5a);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xfC, 0x5a, 0x5a);
+
+	/* Delay 2ms for VCI1 power */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xb0, 0x0c);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xff, 0x10);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xb0, 0x2f);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xd1, 0x01);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0xa5, 0xa5);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xfC, 0xa5, 0xa5);
+
+	/* Sleep Out */
+	mipi_dsi_dcs_exit_sleep_mode_multi(&dsi_ctx);
 	usleep_range(10000, 11000);
 
-	mipi_dsi_dcs_write_seq(dsi, 0xf0, 0x5a, 0x5a);
+	/* TE OUT (Vsync On) */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0x5a, 0x5a);
 
-	ret = mipi_dsi_dcs_set_tear_on(dsi, MIPI_DSI_DCS_TEAR_MODE_VBLANK);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set tear on: %d\n", ret);
-		return ret;
-	}
+	mipi_dsi_dcs_set_tear_on_multi(&dsi_ctx, MIPI_DSI_DCS_TEAR_MODE_VBLANK);
 
-	mipi_dsi_dcs_write_seq(dsi, 0xb7, 0x01, 0x4b);
-	mipi_dsi_dcs_write_seq(dsi, 0xf0, 0xa5, 0xa5);
+	/* DBV Smooth Transition */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xb7, 0x01, 0x4b);
 
-	ret = mipi_dsi_dcs_set_page_address(dsi, 0x0000, 0x0923);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set page address: %d\n", ret);
-		return ret;
-	}
+	/* ELVSS Dim Setting */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xb0, 0x06);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xb7, 0x10);
 
-	mipi_dsi_dcs_write_seq(dsi, 0xf0, 0x5a, 0x5a);
-	mipi_dsi_dcs_write_seq(dsi, 0xfc, 0x5a, 0x5a);
-	mipi_dsi_dcs_write_seq(dsi, 0xb0, 0x23);
-	mipi_dsi_dcs_write_seq(dsi, 0xd1, 0x11);
-	mipi_dsi_dcs_write_seq(dsi, 0xe9,
-			       0x11, 0x55, 0xa6, 0x75, 0xa3, 0xb9, 0xa1, 0x4a,
-			       0x00, 0x1a, 0xb8);
-	mipi_dsi_dcs_write_seq(dsi, 0xe1, 0x00, 0x00, 0x02, 0x02, 0x42, 0x02);
-	mipi_dsi_dcs_write_seq(dsi, 0xe2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-	mipi_dsi_dcs_write_seq(dsi, 0xb0, 0x0c);
-	mipi_dsi_dcs_write_seq(dsi, 0xe1, 0x19);
-	mipi_dsi_dcs_write_seq(dsi, 0xf0, 0xa5, 0xa5);
-	mipi_dsi_dcs_write_seq(dsi, 0xfc, 0xa5, 0xa5);
-	mipi_dsi_dcs_write_seq(dsi, MIPI_DCS_WRITE_CONTROL_DISPLAY, 0x20);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0xa5, 0xa5);
 
-	ret = mipi_dsi_dcs_set_display_brightness(dsi, 0x0000);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set display brightness: %d\n", ret);
-		return ret;
-	}
+	/* Page Address Set */
+	mipi_dsi_dcs_set_page_address_multi(&dsi_ctx, 0x0000, 0x0923);
 
-	mipi_dsi_dcs_write_seq(dsi, MIPI_DCS_WRITE_POWER_SAVE, 0x00);
-	msleep(67);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0x5a, 0x5a);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xfc, 0x5a, 0x5a);
 
-	ret = mipi_dsi_dcs_set_display_on(dsi);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set display on: %d\n", ret);
-		return ret;
-	}
+	/* Set DDIC internal HFP */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xb0, 0x23);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xd1, 0x33);
 
-	return 0;
+	/* FFC Setting: MIPI Speed 82.6Mhz */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xe9, 0x11, 0x55,
+					       0xa6, 0x75, 0xa3,
+					       0xb9, 0xa1, 0x4a,
+					       0x00, 0x1a, 0xb8);
+	
+	/* Err_FG Setting */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xd9,
+				     0x14, 0x00, 0x00, 0x8f, 0x6e, 0x00, 0x00,
+				     0x8f, 0x2e, 0x6e, 0x34);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xc0,
+				     0x31, 0x01, 0x03, 0x00, 0x06, 0x00, 0x00,
+				     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+				     0x00, 0x00, 0x00, 0x50, 0x00, 0x00, 0x40,
+				     0x3d, 0x00, 0x5e, 0x00, 0x00, 0x00, 0x20,
+				     0x07, 0x20, 0x30, 0x58, 0x00, 0x00, 0x00,
+				     0x00, 0x00, 0x00, 0xe0, 0x0b, 0x75, 0xd8,
+				     0x00, 0x00, 0x00, 0x00, 0xfc, 0x00, 0x00,
+				     0x00, 0xf6, 0x97, 0x0f, 0x6d, 0xe6, 0xcd,
+				     0x05, 0x21, 0x8b, 0xec, 0xed, 0xed, 0xed,
+				     0x0d, 0x3f, 0x60, 0x00, 0x67, 0xfd, 0x6d,
+				     0x51, 0xbc, 0xdd, 0xdd, 0x00, 0x00, 0x07,
+				     0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00,
+				     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+				     0x00, 0x70, 0x2f, 0x00, 0x00, 0x03, 0x2e,
+				     0x3c, 0x20, 0xe0, 0x00, 0x00, 0x00, 0x00,
+				     0x00, 0x06, 0x8c);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xc0, 0x31);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xe1,
+				     0x00, 0x00, 0x02, 0x02, 0x42, 0x02);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xe2,
+				     0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xb0, 0x0c);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xe1, 0x19);
+
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0xa5, 0xa5);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xfc, 0xa5, 0xa5);
+
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, MIPI_DCS_WRITE_CONTROL_DISPLAY, 0x20);
+
+	/* Brightness Control */
+	mipi_dsi_dcs_set_display_brightness_multi(&dsi_ctx, 0x0000);
+
+	/* Display On */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, MIPI_DCS_WRITE_POWER_SAVE, 0x00);
+	mipi_dsi_msleep(&dsi_ctx, 67);
+
+	mipi_dsi_dcs_set_display_on_multi(&dsi_ctx);
+
+	return dsi_ctx.accum_err;
 }
 
 static int samsung_ea8076_f1mp_off(struct samsung_ea8076_f1mp *ctx)
 {
 	struct mipi_dsi_device *dsi = ctx->dsi;
-	struct device *dev = &dsi->dev;
-	int ret;
+	struct mipi_dsi_multi_context dsi_ctx = { .dsi = dsi };
 
-	ret = mipi_dsi_dcs_set_display_off(dsi);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set display off: %d\n", ret);
-		return ret;
-	}
+	mipi_dsi_dcs_set_display_off_multi(&dsi_ctx);
 
-	ret = mipi_dsi_dcs_enter_sleep_mode(dsi);
-	if (ret < 0) {
-		dev_err(dev, "Failed to enter sleep mode: %d\n", ret);
-		return ret;
-	}
-	msleep(120);
+	mipi_dsi_dcs_enter_sleep_mode_multi(&dsi_ctx);
 
-	return 0;
+	mipi_dsi_msleep(&dsi_ctx, 120);
+
+	return dsi_ctx.accum_err;
 }
 
 static int samsung_ea8076_f1mp_prepare(struct drm_panel *panel)
@@ -192,20 +218,7 @@ static const struct drm_display_mode samsung_ea8076_f1mp_mode = {
 static int samsung_ea8076_f1mp_get_modes(struct drm_panel *panel,
 				      struct drm_connector *connector)
 {
-	struct drm_display_mode *mode;
-
-	mode = drm_mode_duplicate(connector->dev, &samsung_ea8076_f1mp_mode);
-	if (!mode)
-		return -ENOMEM;
-
-	drm_mode_set_name(mode);
-
-	mode->type = DRM_MODE_TYPE_DRIVER | DRM_MODE_TYPE_PREFERRED;
-	connector->display_info.width_mm = mode->width_mm;
-	connector->display_info.height_mm = mode->height_mm;
-	drm_mode_probed_add(connector, mode);
-
-	return 1;
+	return drm_connector_helper_get_modes_fixed(connector, &samsung_ea8076_f1mp_mode);
 }
 
 static const struct drm_panel_funcs samsung_ea8076_f1mp_panel_funcs = {
