@@ -544,9 +544,23 @@
 };
 
 &i2c9 {
+	clock-frequency = <100000>;
 	status = "okay";
 
-	/* NXP SN100T @ 28  */
+	nfc@28 {
+		compatible = "nxp,nxp-nci-i2c";
+		reg = <0x28>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <47 IRQ_TYPE_EDGE_RISING>;
+
+		enable-gpios = <&tlmm 41 GPIO_ACTIVE_HIGH>;
+		firmware-gpios = <&tlmm 48 GPIO_ACTIVE_HIGH>;
+	
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&nfc_default>;
+		pinctrl-1 = <&nfc_sleep>;
+	};
 };
 
 &i2c17 {
@@ -880,6 +894,20 @@
 		drive-strength = <2>;
 		bias-disable;
 		output-low;
+	};
+
+	nfc_default: nfc-default-state {
+		pins = "gpio103", "gpio113", "gpio48";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-up;
+	};
+
+	nfc_sleep: nfc-sleep-state {
+		pins = "gpio103", "gpio113", "gpio48";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
 	};
 
 	qup_uart13_sleep: qup-uart13-sleep {
