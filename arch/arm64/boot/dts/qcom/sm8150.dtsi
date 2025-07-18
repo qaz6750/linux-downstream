@@ -4020,10 +4020,9 @@
 
 				operating-points-v2 = <&dsi_opp_table>;
 				power-domains = <&rpmhpd SM8150_MMCX>;
+				refgen-supply = <&refgen>;
 
 				phys = <&mdss_dsi0_phy>;
-
-				refgen-supply = <&refgen>;
 
 				status = "disabled";
 
@@ -4115,10 +4114,9 @@
 
 				operating-points-v2 = <&dsi_opp_table>;
 				power-domains = <&rpmhpd SM8150_MMCX>;
+				refgen-supply = <&refgen>;
 
 				phys = <&mdss_dsi1_phy>;
-
-				refgen-supply = <&refgen>;
 
 				status = "disabled";
 
