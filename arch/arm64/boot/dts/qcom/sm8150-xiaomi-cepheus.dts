@@ -735,12 +735,9 @@
 	pinctrl-0 = <&quat_mi2s_active
 		&quat_mi2s_sd0_active>;
 	pinctrl-names = "default";
-	model = "Xiaomi 9";
+	model = "xiaomi-cepheus";
 
-	/*
-	audio-routing =
-		"MultiMedia1 Playback", "SPK";
-	*/
+	audio-routing = "MultiMedia1 Playback", "Speaker";
 
 	mm1-dai-link {
 		link-name = "MultiMedia1";
@@ -936,9 +933,9 @@
 	qcom,micbias3-microvolt = <2700000>;
 	qcom,micbias4-microvolt = <2700000>;
 	
-	//qcom,hphl-jack-type-normally-open;
-	//qcom,ground-jack-type-normally-open;
-	//qcom,mbhc-buttons-vthreshold-microvolt = <75000 150000 237000 500000 500000 500000 500000 500000>;
+	qcom,hphl-jack-type-normally-open;
+	qcom,ground-jack-type-normally-open;
+	qcom,mbhc-buttons-vthreshold-microvolt = <75000 150000 237000 500000 500000 500000 500000 500000>;
 	qcom,mbhc-headset-vthreshold-microvolt = <1700000>;
 	qcom,mbhc-headphone-vthreshold-microvolt = <50000>;
 };
