@@ -254,7 +254,7 @@ struct smb_match_data {
 	const char *name;
 	enum smb_generation gen;
 	size_t init_seq_len;
-	const struct smb_init_register __counted_by(init_seq_len) *init_seq;
+	const struct smb_init_register *init_seq;
 };
 
 static enum power_supply_property smb_properties[] = {
