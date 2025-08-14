@@ -296,18 +296,25 @@ static bool ipa_mem_size_valid(struct ipa *ipa)
 	u32 limit = ipa->mem_size;
 	u32 i;
 
+	dev_dbg(dev, "Checking IPA memory regions (total limit: 0x%08x, count: %u)\n",
+		limit, ipa->mem_count);
+
 	for (i = 0; i < ipa->mem_count; i++) {
 		const struct ipa_mem *mem = &ipa->mem[i];
+
+		dev_dbg(dev, "Region %u: offset=0x%08x, size=0x%08x, end=0x%08x\n",
+			mem->id, mem->offset, mem->size, mem->offset + mem->size);
 
 		if (mem->offset + mem->size <= limit)
 			continue;
 
-		dev_err(dev, "region %u ends beyond memory limit (0x%08x)\n",
+		dev_err(dev, "Region %u ends beyond memory limit (0x%08x)\n",
 			mem->id, limit);
 
 		return false;
 	}
 
+	dev_dbg(dev, "All memory regions fit within IPA memory\n");
 	return true;
 }
 
@@ -337,6 +344,8 @@ int ipa_mem_config(struct ipa *ipa)
 
 	/* Make sure the end is within the region's mapped space */
 	mem_size = 8 * reg_decode(reg, MEM_SIZE, val);
+
+	dev_dbg(ipa->dev, "IPA mem_reg_offset: 0x%08x, mem_reg_size: 0x%08x, ipa_mem_size: x%08x\n", ipa->mem_offset, mem_size, ipa->mem_size);
 
 	/* If the sizes don't match, issue a warning */
 	if (ipa->mem_offset + mem_size < ipa->mem_size) {
