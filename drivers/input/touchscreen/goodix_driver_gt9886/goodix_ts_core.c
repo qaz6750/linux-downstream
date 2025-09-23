@@ -2455,7 +2455,7 @@ static int goodix_ts_probe(struct platform_device *pdev)
 	INIT_WORK(&core_data->power_supply_work, gtp_power_supply_work);
 
 	core_data->bl_notifier.notifier_call = goodix_bl_state_chg_callback;
-	if (backlight_register_notifier(&core_data->bl_notifier) < 0) {
+	if (goodix_ts_register_notifier(&core_data->bl_notifier) < 0) {
 		ts_err("ERROR:register bl_notifier failed\n");
 		goto out;
 	}
@@ -2524,7 +2524,7 @@ static int goodix_ts_probe(struct platform_device *pdev)
 #endif
 
 out:
-	backlight_unregister_notifier(&core_data->bl_notifier);
+	goodix_ts_unregister_notifier(&core_data->bl_notifier);
 	ts_info("goodix_ts_probe OUT, r:%d", r);
 	return r;
 }
