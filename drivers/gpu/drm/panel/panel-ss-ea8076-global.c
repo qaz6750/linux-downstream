@@ -13,6 +13,7 @@
 #include <drm/drm_mipi_dsi.h>
 #include <drm/drm_modes.h>
 #include <drm/drm_panel.h>
+#include <drm/drm_probe_helper.h>
 
 struct ss_ea8076_global {
 	struct drm_panel panel;
@@ -39,86 +40,74 @@ static void ss_ea8076_global_reset(struct ss_ea8076_global *ctx)
 static int ss_ea8076_global_on(struct ss_ea8076_global *ctx)
 {
 	struct mipi_dsi_device *dsi = ctx->dsi;
-	struct device *dev = &dsi->dev;
-	int ret;
+	struct mipi_dsi_multi_context dsi_ctx = { .dsi = dsi };
 
-	ret = mipi_dsi_dcs_exit_sleep_mode(dsi);
-	if (ret < 0) {
-		dev_err(dev, "Failed to exit sleep mode: %d\n", ret);
-		return ret;
-	}
+	/* Sleep Out */
+	mipi_dsi_dcs_exit_sleep_mode_multi(&dsi_ctx);
 	usleep_range(10000, 11000);
 
-	mipi_dsi_dcs_write_seq(dsi, 0xf0, 0x5a, 0x5a);
+	/* TE OUT (Vsync On) */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0x5a, 0x5a);
 
-	ret = mipi_dsi_dcs_set_tear_on(dsi, MIPI_DSI_DCS_TEAR_MODE_VBLANK);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set tear on: %d\n", ret);
-		return ret;
-	}
+	mipi_dsi_dcs_set_tear_on_multi(&dsi_ctx, MIPI_DSI_DCS_TEAR_MODE_VBLANK);
 
-	mipi_dsi_dcs_write_seq(dsi, 0xb7, 0x01, 0x4b);
-	mipi_dsi_dcs_write_seq(dsi, 0xf0, 0xa5, 0xa5);
+	/* DBV Smooth Transition */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xb7, 0x01, 0x4b);
 
-	ret = mipi_dsi_dcs_set_page_address(dsi, 0x0000, 0x0923);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set page address: %d\n", ret);
-		return ret;
-	}
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0xa5, 0xa5);
 
-	mipi_dsi_dcs_write_seq(dsi, 0xf0, 0x5a, 0x5a);
-	mipi_dsi_dcs_write_seq(dsi, 0xfc, 0x5a, 0x5a);
-	mipi_dsi_dcs_write_seq(dsi, 0xb0, 0x23);
-	mipi_dsi_dcs_write_seq(dsi, 0xd1, 0x11);
-	mipi_dsi_dcs_write_seq(dsi, 0xe9,
-			       0x11, 0x55, 0xa6, 0x75, 0xa3, 0xb9, 0xa1, 0x4a,
-			       0x00, 0x1a, 0xb8);
-	mipi_dsi_dcs_write_seq(dsi, 0xe1, 0x00, 0x00, 0x02, 0x02, 0x42, 0x02);
-	mipi_dsi_dcs_write_seq(dsi, 0xe2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-	mipi_dsi_dcs_write_seq(dsi, 0xb0, 0x0c);
-	mipi_dsi_dcs_write_seq(dsi, 0xe1, 0x19);
-	mipi_dsi_dcs_write_seq(dsi, 0xf0, 0xa5, 0xa5);
-	mipi_dsi_dcs_write_seq(dsi, 0xfc, 0xa5, 0xa5);
-	mipi_dsi_dcs_write_seq(dsi, MIPI_DCS_WRITE_CONTROL_DISPLAY, 0x20);
+	/* Page Address Set */
+	mipi_dsi_dcs_set_page_address_multi(&dsi_ctx, 0x0000, 0x0923);
 
-	ret = mipi_dsi_dcs_set_display_brightness(dsi, 0x0000);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set display brightness: %d\n", ret);
-		return ret;
-	}
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0x5a, 0x5a);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xfc, 0x5a, 0x5a);
 
-	mipi_dsi_dcs_write_seq(dsi, MIPI_DCS_WRITE_POWER_SAVE, 0x00);
-	msleep(67);
+	/* Set DDIC internal HFP */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xb0, 0x23);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xd1, 0x33);
 
-	ret = mipi_dsi_dcs_set_display_on(dsi);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set display on: %d\n", ret);
-		return ret;
-	}
+	/* FFC Setting: MIPI Speed 82.6Mhz */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xe9, 0x11, 0x55,
+					       0xa6, 0x75, 0xa3,
+					       0xb9, 0xa1, 0x4a,
+					       0x00, 0x1a, 0xb8);
 
-	return 0;
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xe1,
+				     0x00, 0x00, 0x02, 0x02, 0x42, 0x02);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xe2,
+				     0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xb0, 0x0c);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xe1, 0x19);
+
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xf0, 0xa5, 0xa5);
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, 0xfc, 0xa5, 0xa5);
+
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, MIPI_DCS_WRITE_CONTROL_DISPLAY, 0x20);
+
+	/* Brightness Control */
+	mipi_dsi_dcs_set_display_brightness_multi(&dsi_ctx, 0x0000);
+
+	/* Display On */
+	mipi_dsi_dcs_write_seq_multi(&dsi_ctx, MIPI_DCS_WRITE_POWER_SAVE, 0x00);
+	mipi_dsi_msleep(&dsi_ctx, 67);
+
+	mipi_dsi_dcs_set_display_on_multi(&dsi_ctx);
+
+	return dsi_ctx.accum_err;
 }
 
 static int ss_ea8076_global_off(struct ss_ea8076_global *ctx)
 {
 	struct mipi_dsi_device *dsi = ctx->dsi;
-	struct device *dev = &dsi->dev;
-	int ret;
+	struct mipi_dsi_multi_context dsi_ctx = { .dsi = dsi };
 
-	ret = mipi_dsi_dcs_set_display_off(dsi);
-	if (ret < 0) {
-		dev_err(dev, "Failed to set display off: %d\n", ret);
-		return ret;
-	}
+	mipi_dsi_dcs_set_display_off_multi(&dsi_ctx);
 
-	ret = mipi_dsi_dcs_enter_sleep_mode(dsi);
-	if (ret < 0) {
-		dev_err(dev, "Failed to enter sleep mode: %d\n", ret);
-		return ret;
-	}
-	msleep(120);
+	mipi_dsi_dcs_enter_sleep_mode_multi(&dsi_ctx);
 
-	return 0;
+	mipi_dsi_msleep(&dsi_ctx, 120);
+
+	return dsi_ctx.accum_err;
 }
 
 static int ss_ea8076_global_prepare(struct drm_panel *panel)
@@ -226,8 +215,6 @@ static int ss_ea8076_global_bl_update_status(struct backlight_device *bl)
 	return 0;
 }
 
-// TODO: Check if /sys/class/backlight/.../actual_brightness actually returns
-// correct values. If not, remove this function.
 static int ss_ea8076_global_bl_get_brightness(struct backlight_device *bl)
 {
 	struct mipi_dsi_device *dsi = bl_get_data(bl);
@@ -330,7 +317,7 @@ static void ss_ea8076_global_remove(struct mipi_dsi_device *dsi)
 }
 
 static const struct of_device_id ss_ea8076_global_of_match[] = {
-	{ .compatible = "ss,ea8076-global" }, // FIXME
+	{ .compatible = "ss,ea8076-global" },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, ss_ea8076_global_of_match);
