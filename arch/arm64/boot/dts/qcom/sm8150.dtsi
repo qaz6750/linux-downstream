@@ -4230,6 +4230,8 @@
 
 			iommus = <&apps_smmu 0x800 0x420>;
 
+			resets = <&gcc DISP_CC_MDSS_CORE_BCR>;
+
 			status = "disabled";
 
 			#address-cells = <2>;
