@@ -200,6 +200,8 @@ static int sm8150_snd_hw_params(struct snd_pcm_substream *substream,
 	int ret = 0;
 
 	switch (cpu_dai->id) {
+	case QUATERNARY_MI2S_RX:
+		break;
 	case QUATERNARY_TDM_RX_0:
 	case QUATERNARY_TDM_TX_0:
 		ret = sm8150_tdm_snd_hw_params(substream, params);
@@ -306,6 +308,19 @@ static int sm8150_snd_startup(struct snd_pcm_substream *substream)
 	struct snd_soc_dai *codec_dai = snd_soc_rtd_to_codec(rtd, 0);
 
 	switch (cpu_dai->id) {
+	case QUATERNARY_MI2S_RX:
+		fmt = SND_SOC_DAIFMT_BP_FP;
+		codec_dai_fmt = SND_SOC_DAIFMT_BC_FC |
+				SND_SOC_DAIFMT_NB_NF |
+				SND_SOC_DAIFMT_I2S;
+
+		snd_soc_dai_set_sysclk(cpu_dai,
+			Q6AFE_LPASS_CLK_ID_QUAD_MI2S_IBIT,
+			3072000, SNDRV_PCM_STREAM_PLAYBACK);
+		snd_soc_dai_set_fmt(cpu_dai, fmt);
+		snd_soc_dai_set_fmt(codec_dai, codec_dai_fmt);
+		break;
+
 	case QUATERNARY_TDM_RX_0:
 		codec_dai_fmt |= SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_DSP_A;
 		if (++(data->quat_tdm_clk_count) == 1) {
