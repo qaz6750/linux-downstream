@@ -446,6 +446,28 @@ out:
 	return desc;
 }
 
+/*
+ * HACK: of_get_named_gpio() and <linux/of_gpio.h> were removed upstream in
+ * commit b6420bd5aa0c ("gpio: remove of_get_named_gpio() and
+ * <linux/of_gpio.h>"). Some out-of-tree drivers (goodix gt9886, ST fts_521)
+ * still rely on the legacy integer-based GPIO API and only need to resolve a
+ * GPIO number from a device-tree property without claiming it. Re-introduce a
+ * minimal parse-only helper for them.
+ */
+int of_get_named_gpio(const struct device_node *np, const char *propname,
+		      int index)
+{
+	struct gpio_desc *desc;
+
+	desc = of_get_named_gpiod_flags(np, propname, index, NULL);
+
+	if (IS_ERR(desc))
+		return PTR_ERR(desc);
+
+	return desc_to_gpio(desc);
+}
+EXPORT_SYMBOL_GPL(of_get_named_gpio);
+
 /* Converts gpio_lookup_flags into bitmask of GPIO_* values */
 static unsigned long of_convert_gpio_flags(enum of_gpio_flags flags)
 {
