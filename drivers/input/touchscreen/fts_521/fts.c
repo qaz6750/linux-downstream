@@ -3887,47 +3887,6 @@ static void fts_user_report_event_handler(struct fts_ts_info *info,
 
 }
 
-/*
-static void buffDump(unsigned char *buf, unsigned int buflength, char *tag)
-{
-	unsigned char *tmp, *back;
-	unsigned int i;
-	unsigned int to_read;
-	unsigned int remain = buflength;
-	unsigned int chunk = 10;
-
-	logError(1, "%s BUFFDUMP IN:", tag);
-
-	tmp = kmalloc(300, GFP_ATOMIC);
-	if (!tmp) {
-		logError(1, "alloc tmp=%04d byte failed", 300);
-		return;
-	}
-	back = tmp;
-
-	memcpy(tmp, buf, buflength);
-
-	while (remain > 0) {
-		if (remain > chunk) {
-			remain -= chunk;
-			to_read = chunk;
-		} else {
-			to_read = remain;
-			for (i = to_read; i < chunk; i++) {
-				tmp[i] = 0xED;
-			}
-			remain = 0;
-		}
-
-		logError(1, "%s %02x  %02x  %02x  %02x  %02x  %02x  %02x  %02x  %02x  %02x",
-				tag, tmp[0], tmp[1], tmp[2], tmp[3], tmp[4], tmp[5], tmp[6], tmp[7], tmp[8], tmp[9]);
-
-		tmp += to_read;
-	}
-	kfree(back);
-}
-*/
-
 static void fts_ts_sleep_work(struct work_struct *work)
 {
 	struct fts_ts_info *info = container_of(work, struct fts_ts_info, sleep_work);
@@ -5920,7 +5879,6 @@ static int fts_probe(struct spi_device *client)
 	int retval;
 	int skip_5_1 = 0;
 	u16 bus_type;
-	u8 *tp_maker;
 
 	logError(1, "%s %s: driver ver: %s\n", tag, __func__,
 		 FTS_TS_DRV_VERSION);
@@ -6283,13 +6241,6 @@ static int fts_probe(struct spi_device *client)
 		logError(1, "%s Error: can not create /proc file! \n", tag);
 	info->dbclick_count = 0;
 
-	tp_maker = kzalloc(20, GFP_KERNEL);
-	if (tp_maker == NULL)
-		logError(1, "%s fail to alloc vendor name memory\n", tag);
-	else {
-		kfree(tp_maker);
-		tp_maker = NULL;
-	}
 	device_init_wakeup(&client->dev, 1);
 
 	init_completion(&info->pm_resume_completion);
