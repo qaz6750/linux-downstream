@@ -801,19 +801,6 @@
 	status = "okay";
 };
 
-&q6afedai {
-	qi2s@22 {
-		reg = <QUATERNARY_MI2S_RX>;
-		qcom,sd-lines = <0>;
-	};
-};
-
-&q6asmdai {
-	dai@0 {
-		reg = <0>;
-	};
-};
-
 &qupv3_id_0 {
 	status = "okay";
 };
@@ -846,22 +833,45 @@
 	firmware-name = "qcom/sm8150/xiaomi/cepheus/slpi.mbn";
 };
 
-&sound {
-	compatible = "qcom,sdm845-sndcard";
-	pinctrl-0 = <&quat_mi2s_active
-		&quat_mi2s_sd0_active>;
-	pinctrl-names = "default";
-	model = "Xiaomi 9";
+&q6afedai {
+	qi2s@22 {
+		reg = <QUATERNARY_MI2S_RX>;
+		qcom,sd-lines = <0>;
+	};
+};
 
-	/*
-	audio-routing =
-		"MultiMedia1 Playback", "SPK";
-	*/
+&q6asmdai {
+	dai@0 {
+		reg = <MSM_FRONTEND_DAI_MULTIMEDIA1>;
+	};
+
+	dai@1 {
+		reg = <MSM_FRONTEND_DAI_MULTIMEDIA2>;
+	};
+};
+
+&sound {
+	compatible = "qcom,sm8150-sndcard";
+	pinctrl-0 = <&quat_mi2s_active &quat_mi2s_sd0_active>;
+	pinctrl-names = "default";
+	model = "xiaomi cepheus";
+
+	audio-routing =	"RX_BIAS", "MCLK",
+		"AMIC1", "MIC BIAS1",
+		"AMIC3", "MIC BIAS3",
+		"AMIC4", "MIC BIAS1";
 
 	mm1-dai-link {
 		link-name = "MultiMedia1";
 		cpu {
 			sound-dai = <&q6asmdai MSM_FRONTEND_DAI_MULTIMEDIA1>;
+		};
+	};
+
+	mm2-dai-link {
+		link-name = "MultiMedia2";
+		cpu {
+			sound-dai = <&q6asmdai MSM_FRONTEND_DAI_MULTIMEDIA2>;
 		};
 	};
 
@@ -877,6 +887,22 @@
 
 		codec {
 			sound-dai = <&cs35l41_codec 0>;
+		};
+	};
+
+	//Bottom & Top internal microphones
+	slimcap-dai-link {
+		link-name = "SLIM Capture 1";
+		cpu {
+			sound-dai = <&q6afedai SLIMBUS_0_TX>;
+		};
+
+		platform {
+			sound-dai = <&q6routing>;
+		};
+
+		codec {
+			sound-dai = <&wcd9340 1>; /* AIF1_CAP */
 		};
 	};
 };
@@ -1067,11 +1093,12 @@
 	vdd-io-supply = <&vreg_s4a_1p8>;
 
 	qcom,micbias1-microvolt = <2700000>;
-	qcom,micbias2-microvolt = <1800000>;
+	qcom,micbias2-microvolt = <2700000>;
 	qcom,micbias3-microvolt = <2700000>;
 	qcom,micbias4-microvolt = <2700000>;
 	
-	qcom,mbhc-headset-vthreshold-microvolt = <1700000>;
+	qcom,mbhc-buttons-vthreshold-microvolt = <75000 150000 237000 500000 500000 500000 500000 500000>;
+	qcom,mbhc-headset-vthreshold-microvolt = <2600000>;
 	qcom,mbhc-headphone-vthreshold-microvolt = <50000>;
 };
 
