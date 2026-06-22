@@ -599,6 +599,13 @@
 	};
 };
 
+&ipa {
+	status = "okay";
+	qcom,gsi-loader = "self";
+	memory-region = <&ipa_fw_mem>;
+	firmware-name = "qcom/sm8150/xiaomi/cepheus/ipa_fws.mbn";
+};
+
 &gpi_dma0 {
 	status = "okay";
 };
