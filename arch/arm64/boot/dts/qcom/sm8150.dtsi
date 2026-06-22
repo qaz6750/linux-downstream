@@ -4800,13 +4800,6 @@
 				qcom,remote-pid = <2>;
 				mboxes = <&apss_shared 8>;
 
-				qcom,adsp_qrtr {
-					qcom,glink-channels = "IPCRTR";
-					qcom,intents = <0x800 5
-							0x2000 3
-							0x4400 2>;
-				};
-
 				apr {
 					compatible = "qcom,apr-v2";
 					qcom,glink-channels = "apr_audio_svc";
