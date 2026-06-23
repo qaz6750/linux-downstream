@@ -522,21 +522,22 @@
 
 	/* Qcom SMB1390 @ 10 */
 
-	cs35l41_codec: cs35l41@40 {
+	cs35l41: speaker-amp@40 {
 		compatible = "cirrus,cs35l41";
 		reg = <0x40>;
+		VA-supply = <&vreg_s4a_1p8>;
+		VP-supply = <&vph_pwr>;
 		interrupt-parent = <&tlmm>;
 		interrupts = <10 IRQ_TYPE_LEVEL_LOW>;
 		reset-gpios = <&tlmm 89 GPIO_ACTIVE_HIGH>;
+
 		cirrus,boost-peak-milliamp = <4000>;
 		cirrus,boost-ind-nanohenry = <1000>;
 		cirrus,boost-cap-microfarad = <15>;
-		cirrus,asp-sdout-hiz = <3>;
 		cirrus,gpio2-src-select = <4>;
 		cirrus,gpio2-output-enable;
 		sound-name-prefix = "Speaker";
 		#sound-dai-cells = <1>;
-
 	};
 
 	/* IDTP9220 @ 3B  */
@@ -893,7 +894,7 @@
 		};
 
 		codec {
-			sound-dai = <&cs35l41_codec 0>;
+			sound-dai = <&cs35l41 0>;
 		};
 	};
 
