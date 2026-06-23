@@ -1282,15 +1282,8 @@ int cs35l41_global_enable(struct device *dev, struct regmap *regmap, enum cs35l4
 			dev_err(dev, "CS35L41_PWR_CTRL1 set failed: %d\n", ret);
 			return ret;
 		}
-
-		ret = regmap_read_poll_timeout(regmap, CS35L41_IRQ1_STATUS1,
-					int_status, int_status & pup_pdn_mask,
-					1000, 100000);
-		if (ret)
-			dev_err(dev, "Enable(%d) failed: %d\n", enable, ret);
-
-		/* Clear PUP/PDN status */
-		regmap_write(regmap, CS35L41_IRQ1_STATUS1, pup_pdn_mask);
+		/* Match Android/Windows: only wait 1ms, do not poll PUP_DONE/PDN_DONE */
+		usleep_range(1000, 1100);
 		break;
 	case CS35L41_EXT_BOOST:
 	case CS35L41_EXT_BOOST_NO_VSPK_SWITCH:
