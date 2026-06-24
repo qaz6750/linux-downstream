@@ -4804,11 +4804,13 @@
 					apr-service@3 {
 						reg = <APR_SVC_ADSP_CORE>;
 						compatible = "qcom,q6core";
+						qcom,protection-domain = "avs/audio", "msm/adsp/audio_pd";
 					};
 
 					q6afe: apr-service@4 {
 						compatible = "qcom,q6afe";
 						reg = <APR_SVC_AFE>;
+						qcom,protection-domain = "avs/audio", "msm/adsp/audio_pd";
 						q6afedai: dais {
 							compatible = "qcom,q6afe-dais";
 							#address-cells = <1>;
@@ -4825,6 +4827,7 @@
 					q6asm: apr-service@7 {
 						compatible = "qcom,q6asm";
 						reg = <APR_SVC_ASM>;
+						qcom,protection-domain = "avs/audio", "msm/adsp/audio_pd";
 						q6asmdai: dais {
 							compatible = "qcom,q6asm-dais";
 							#address-cells = <1>;
@@ -4837,6 +4840,7 @@
 					q6adm: apr-service@8 {
 						compatible = "qcom,q6adm";
 						reg = <APR_SVC_ADM>;
+						qcom,protection-domain = "avs/audio", "msm/adsp/audio_pd";
 						q6routing: routing {
 							compatible = "qcom,q6adm-routing";
 							#sound-dai-cells = <0>;
