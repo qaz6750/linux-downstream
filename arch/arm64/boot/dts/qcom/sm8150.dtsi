@@ -4763,6 +4763,7 @@
 			dma-names = "rx", "tx";
 
 			iommus = <&apps_smmu 0x1b46 0x0>;
+			qcom,protection-domain = "avs/audio", "msm/adsp/audio_pd";
 			#address-cells = <1>;
 			#size-cells = <0>;
 			status = "disabled";
@@ -4839,7 +4840,6 @@
 							#address-cells = <1>;
 							#size-cells = <0>;
 							#sound-dai-cells = <1>;
-							iommus = <&apps_smmu 0x1b21 0x0>;
 						};
 					};
 
