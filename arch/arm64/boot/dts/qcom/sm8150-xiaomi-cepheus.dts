@@ -99,7 +99,8 @@
 			linux,code = <KEY_HOMEPAGE>; /* no AI key in Linux */
 			wakeup-source;
 			debounce-interval = <39>;
-		};	};
+		};	
+	};
 
 	reserved-memory {
 		tz_mem: memory@86200000 {
@@ -192,41 +193,34 @@
 		voltage-max-design-microvolt = <4400000>;
 	};
 
-	disp_vci_vreg: disp_vci_vreg {
+	vreg_disp_vci: regulator-disp-vci {
 		compatible = "regulator-fixed";
-		regulator-name = "disp_vci_vreg";
+		regulator-name = "vreg_disp_vci";
 		enable-active-high;
 		regulator-boot-on;
 		gpio = <&tlmm 21 0>;
 	};
 
-	touch_vddio_vreg: touch_vddio_vreg {
+	vreg_touch_vddio: regulator-touch-vddio {
 		compatible = "regulator-fixed";
-		regulator-name = "disp_vddio_vreg";
+		regulator-name = "vreg_touch_vddio";
 		startup-delay-us = <4000>;
 		enable-active-high;
 		regulator-boot-on;
 		gpio = <&tlmm 84 0>;
 	};
 
-	vdd_boost_vreg: vdd_boost_vreg {
+	vreg_vdd_boost: regulator-vdd-boost {
 		compatible = "regulator-fixed";
-		regulator-name = "vdd_boost_vreg";
+		regulator-name = "vreg_vdd_boost";
 		startup-delay-us = <4000>;
 		enable-active-high;
 		regulator-always-on;
 		gpio = <&pm8150b_gpios 5 0>;
 	};
 
-	vph_pwr: vph-pwr-regulator {
-		compatible = "regulator-fixed";
-		regulator-name = "vph_pwr";
-		regulator-min-microvolt = <3700000>;
-		regulator-max-microvolt = <3700000>;
-	};
-
 	/* S4 is modeled as a fixed regulator in vendor sources */
-	vreg_s4a_1p8: pm8150-s4-regulator {
+	vreg_s4a_1p8: regulator-pm8150-s4 {
 		compatible = "regulator-fixed";
 		regulator-name = "vreg_s4a_1p8";
 
@@ -237,6 +231,13 @@
 		regulator-boot-on;
 
 		vin-supply = <&vph_pwr>;
+	};
+
+	vph_pwr: vph-pwr-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "vph_pwr";
+		regulator-min-microvolt = <3700000>;
+		regulator-max-microvolt = <3700000>;
 	};
 };
 
@@ -577,7 +578,7 @@
 		pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
 		pinctrl-0 = <&ts_active>;
 		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
-		vdd-supply = <&touch_vddio_vreg>;
+		vdd-supply = <&vreg_touch_vddio>;
 		avdd-supply = <&vreg_l1c_1p8>;
 		fts,pwr-reg-name = "avdd";
 		fts,bus-reg-name = "vdd";
@@ -641,7 +642,7 @@
 		status = "okay";
 
 		vddio-supply = <&vreg_l14a_1p8>;
-		vcie-supply = <&disp_vci_vreg>;
+		vcie-supply = <&vreg_disp_vci>;
 		vci-supply = <&vreg_l13a_2p7>;
 
 		reset-gpios = <&tlmm 6 GPIO_ACTIVE_LOW>;
