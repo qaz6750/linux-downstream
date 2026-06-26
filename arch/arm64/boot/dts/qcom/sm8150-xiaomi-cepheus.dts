@@ -538,7 +538,7 @@
 		cirrus,gpio2-src-select = <4>;
 		cirrus,gpio2-output-enable;
 		sound-name-prefix = "Speaker";
-		#sound-dai-cells = <1>;
+		#sound-dai-cells = <0>;
 	};
 
 	/* IDTP9220 @ 3B  */
@@ -853,10 +853,6 @@
 	dai@0 {
 		reg = <MSM_FRONTEND_DAI_MULTIMEDIA1>;
 	};
-
-	dai@1 {
-		reg = <MSM_FRONTEND_DAI_MULTIMEDIA2>;
-	};
 };
 
 &sound {
@@ -865,22 +861,10 @@
 	pinctrl-names = "default";
 	model = "xiaomi cepheus";
 
-	audio-routing =	"RX_BIAS", "MCLK",
-		"AMIC1", "MIC BIAS1",
-		"AMIC3", "MIC BIAS3",
-		"AMIC4", "MIC BIAS1";
-
 	mm1-dai-link {
 		link-name = "MultiMedia1";
 		cpu {
 			sound-dai = <&q6asmdai MSM_FRONTEND_DAI_MULTIMEDIA1>;
-		};
-	};
-
-	mm2-dai-link {
-		link-name = "MultiMedia2";
-		cpu {
-			sound-dai = <&q6asmdai MSM_FRONTEND_DAI_MULTIMEDIA2>;
 		};
 	};
 
@@ -895,23 +879,7 @@
 		};
 
 		codec {
-			sound-dai = <&cs35l41 0>;
-		};
-	};
-
-	//Bottom & Top internal microphones
-	slimcap-dai-link {
-		link-name = "SLIM Capture 1";
-		cpu {
-			sound-dai = <&q6afedai SLIMBUS_0_TX>;
-		};
-
-		platform {
-			sound-dai = <&q6routing>;
-		};
-
-		codec {
-			sound-dai = <&wcd9340 1>; /* AIF1_CAP */
+			sound-dai = <&cs35l41>;
 		};
 	};
 };
