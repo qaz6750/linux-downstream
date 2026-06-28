@@ -1088,3 +1088,8 @@
 
 	qcom,calibration-variant = "xiaomi_cepheus";
 };
+
+&venus {
+	firmware-name = "qcom/sm8150/xiaomi/cepheus/venus.mbn";
+	status = "okay";
+};
