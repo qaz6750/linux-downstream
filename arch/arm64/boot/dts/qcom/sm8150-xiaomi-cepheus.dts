@@ -548,7 +548,7 @@
 		cirrus,gpio2-src-select = <4>;
 		cirrus,gpio2-output-enable;
 		sound-name-prefix = "Speaker";
-		#sound-dai-cells = <0>;
+		#sound-dai-cells = <1>;
 	};
 
 	/* IDTP9220 @ 3B  */
@@ -917,7 +917,7 @@
 		};
 
 		codec {
-			sound-dai = <&cs35l41>;
+			sound-dai = <&cs35l41 0>;
 		};
 	};
 };
