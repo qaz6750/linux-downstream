@@ -621,7 +621,6 @@
 			fts,tp-vendor = <0x48>;
 			fts,fw-name = "st_fts_f1.ftb";
 			fts,limit-name = "stm_fts_production_limits.csv";
-			fts,clicknum-file-name = "fts+sdc";
 		};
 	};
 };
