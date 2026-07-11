@@ -225,6 +225,18 @@ config INPUT_PM8XXX_VIBRATOR
 	  To compile this driver as module, choose M here: the
 	  module will be called pm8xxx-vibrator.
 
+config INPUT_QCOM_SPMI_HAPTICS
+	tristate "Qualcomm SPMI haptics support"
+	depends on SPMI
+	depends on MFD_SPMI_PMIC || COMPILE_TEST
+	select INPUT_FF_MEMLESS
+	help
+	  Say Y here to enable support for Qualcomm PMIC haptics blocks,
+	  such as the haptics peripheral found in PM8150B.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called qcom-spmi-haptics.
+
 config INPUT_PMIC8XXX_PWRKEY
 	tristate "PMIC8XXX power key support"
 	depends on MFD_PM8XXX
