@@ -580,7 +580,7 @@
 		interrupt-parent = <&tlmm>;
 		interrupts = <47 IRQ_TYPE_EDGE_RISING>;
 
-		enable-gpios = <&tlmm 41 GPIO_ACTIVE_HIGH>;
+		enable-gpios = <&tlmm 103 GPIO_ACTIVE_HIGH>;
 		firmware-gpios = <&tlmm 48 GPIO_ACTIVE_HIGH>;
 	
 		pinctrl-names = "default", "sleep";
