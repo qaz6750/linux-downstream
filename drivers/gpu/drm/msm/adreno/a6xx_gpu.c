@@ -2464,7 +2464,11 @@ a6xx_create_vm(struct msm_gpu *gpu, struct platform_device *pdev)
 static struct drm_gpuvm *
 a6xx_create_private_vm(struct msm_gpu *gpu, bool kernel_managed)
 {
+	struct adreno_gpu *adreno_gpu = to_adreno_gpu(gpu);
 	struct msm_mmu *mmu;
+
+	if (adreno_gpu->info->quirks & ADRENO_QUIRK_NO_PRIVATE_VM)
+		return ERR_PTR(-EOPNOTSUPP);
 
 	mmu = msm_iommu_pagetable_create(to_msm_vm(gpu->vm)->mmu, kernel_managed);
 

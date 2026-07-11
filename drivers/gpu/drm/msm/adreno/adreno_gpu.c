@@ -459,6 +459,7 @@ int adreno_get_param(struct msm_gpu *gpu, struct msm_context *ctx,
 int adreno_set_param(struct msm_gpu *gpu, struct msm_context *ctx,
 		     uint32_t param, uint64_t value, uint32_t len)
 {
+	struct adreno_gpu *adreno_gpu = to_adreno_gpu(gpu);
 	struct drm_device *drm = gpu->dev;
 
 	switch (param) {
@@ -504,6 +505,10 @@ int adreno_set_param(struct msm_gpu *gpu, struct msm_context *ctx,
 			return UERR(EPERM, drm, "invalid permissions");
 		return msm_context_set_sysprof(ctx, gpu, value);
 	case MSM_PARAM_EN_VM_BIND:
+		if (adreno_gpu->info->quirks & ADRENO_QUIRK_NO_PRIVATE_VM)
+			return UERR(EOPNOTSUPP, drm,
+				    "VM_BIND is disabled on this GPU");
+
 		/* We can only support VM_BIND with per-process pgtables: */
 		if (ctx->vm == gpu->vm)
 			return UERR(EINVAL, drm, "requires per-process pgtables");
