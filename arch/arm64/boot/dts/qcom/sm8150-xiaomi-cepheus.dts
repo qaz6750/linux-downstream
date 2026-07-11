@@ -241,6 +241,16 @@
 	};
 };
 
+&pm8150b_gpios {
+	idtp_power_good_default: idtp-power-good-state {
+		pins = "gpio7";
+		function = "normal";
+		power-source = <1>;
+		bias-disable;
+		input-enable;
+	};
+};
+
 &apps_rsc {
 	pm8150-rpmh-regulators {
 		compatible = "qcom,pm8150-rpmh-regulators";
@@ -542,6 +552,21 @@
 	};
 
 	/* IDTP9220 @ 3B  */
+	wireless-power@3b {
+		compatible = "idt,p9220";
+		reg = <0x3b>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <90 IRQ_TYPE_EDGE_FALLING>;
+
+		enable-gpios = <&tlmm 104 GPIO_ACTIVE_LOW>;
+		power-good-gpios = <&pm8150b_gpios 7 GPIO_ACTIVE_HIGH>;
+
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&idt_default &idtp_power_good_default>;
+		pinctrl-1 = <&idt_sleep &idtp_power_good_default>;
+		wakeup-source;
+	};
 };
 
 &i2c9 {
@@ -900,6 +925,41 @@
 &tlmm {
 	/* gpios 0..3 are NFC spi, gpios 126..129 are FP spi */
 	gpio-reserved-ranges = <0 4>, <126 4>;
+
+	idt_default: idt-default-state {
+		idt-irq-pins {
+			pins = "gpio90";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-pull-up;
+			input-enable;
+		};
+
+		idt-enable-pins {
+			pins = "gpio104";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-disable;
+			output-low;
+		};
+	};
+
+	idt_sleep: idt-sleep-state {
+		idt-irq-pins {
+			pins = "gpio90";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-pull-up;
+			input-enable;
+		};
+
+		idt-enable-pins {
+			pins = "gpio104";
+			function = "gpio";
+			drive-strength = <2>;
+			bias-pull-up;
+		};
+	};
 
 	quat_mi2s_active: quat-mi2s-active-state {
 		pins = "gpio137", "gpio138";
