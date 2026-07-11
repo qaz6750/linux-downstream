@@ -50,7 +50,7 @@
 		wifi0 = &wifi;
 	};
 
-	memory {
+	memory@80000000 {
 		ddr_device_type = <0x08>;
 		device_type = "memory";
 		#address-cells = <2>;
