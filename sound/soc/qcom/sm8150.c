@@ -47,6 +47,7 @@ static const struct {
 static int sm8150_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 				     struct snd_pcm_hw_params *params)
 {
+	struct snd_soc_dai *cpu_dai = snd_soc_rtd_to_cpu(rtd, 0);
 	struct snd_interval *rate = hw_param_interval(params,
 					SNDRV_PCM_HW_PARAM_RATE);
 	struct snd_interval *channels = hw_param_interval(params,
@@ -56,7 +57,10 @@ static int sm8150_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 	rate->min = rate->max = 48000;
 	channels->min = channels->max = 2;
 	snd_mask_none(fmt);
-	snd_mask_set_format(fmt, SNDRV_PCM_FORMAT_S24_LE);
+	if (cpu_dai->id == QUATERNARY_MI2S_RX)
+		snd_mask_set_format(fmt, SNDRV_PCM_FORMAT_S16_LE);
+	else
+		snd_mask_set_format(fmt, SNDRV_PCM_FORMAT_S24_LE);
 
 	return 0;
 }
@@ -306,6 +310,7 @@ static int sm8150_snd_startup(struct snd_pcm_substream *substream)
 	struct sm8150_snd_data *data = snd_soc_card_get_drvdata(card);
 	struct snd_soc_dai *cpu_dai = snd_soc_rtd_to_cpu(rtd, 0);
 	struct snd_soc_dai *codec_dai = snd_soc_rtd_to_codec(rtd, 0);
+	int ret;
 
 	switch (cpu_dai->id) {
 	case QUATERNARY_MI2S_RX:
@@ -314,11 +319,29 @@ static int sm8150_snd_startup(struct snd_pcm_substream *substream)
 				SND_SOC_DAIFMT_NB_NF |
 				SND_SOC_DAIFMT_I2S;
 
-		snd_soc_dai_set_sysclk(cpu_dai,
+		ret = snd_soc_dai_set_sysclk(cpu_dai,
 			Q6AFE_LPASS_CLK_ID_QUAD_MI2S_IBIT,
-			3072000, SNDRV_PCM_STREAM_PLAYBACK);
-		snd_soc_dai_set_fmt(cpu_dai, fmt);
-		snd_soc_dai_set_fmt(codec_dai, codec_dai_fmt);
+			1536000, SNDRV_PCM_STREAM_PLAYBACK);
+		if (ret < 0)
+			return ret;
+
+		ret = snd_soc_dai_set_sysclk(codec_dai, 0, 1536000,
+					     SND_SOC_CLOCK_IN);
+		if (ret < 0)
+			return ret;
+
+		ret = snd_soc_component_set_sysclk(codec_dai->component, 0, 0,
+					       1536000, SND_SOC_CLOCK_IN);
+		if (ret < 0)
+			return ret;
+
+		ret = snd_soc_dai_set_fmt(cpu_dai, fmt);
+		if (ret < 0)
+			return ret;
+
+		ret = snd_soc_dai_set_fmt(codec_dai, codec_dai_fmt);
+		if (ret < 0)
+			return ret;
 		break;
 
 	case QUATERNARY_TDM_RX_0:
