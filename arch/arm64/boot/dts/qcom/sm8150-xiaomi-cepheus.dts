@@ -525,7 +525,11 @@
 &spi1 {
 	status = "okay";
 
-	/* IR LED @ 0  */
+	irled@0 {
+		compatible = "ir-spi-led";
+		reg = <0>;
+		spi-max-frequency = <19200000>;
+	};
 };
 
 &i2c4 {
