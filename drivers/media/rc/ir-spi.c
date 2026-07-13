@@ -76,15 +76,18 @@ static int ir_spi_tx(struct rc_dev *dev, unsigned int *buffer, unsigned int coun
 	xfer.len = len * sizeof(*tx_buf);
 	xfer.tx_buf = tx_buf;
 
-	ret = regulator_enable(idata->regulator);
-	if (ret)
-		goto err_free_tx_buf;
+	if (idata->regulator) {
+		ret = regulator_enable(idata->regulator);
+		if (ret)
+			goto err_free_tx_buf;
+	}
 
 	ret = spi_sync_transfer(idata->spi, &xfer, 1);
 	if (ret)
 		dev_err(&idata->spi->dev, "unable to deliver the signal\n");
 
-	regulator_disable(idata->regulator);
+	if (idata->regulator)
+		regulator_disable(idata->regulator);
 
 err_free_tx_buf:
 
@@ -136,9 +139,13 @@ static int ir_spi_probe(struct spi_device *spi)
 	if (!idata)
 		return -ENOMEM;
 
-	idata->regulator = devm_regulator_get(dev, "irda_regulator");
-	if (IS_ERR(idata->regulator))
-		return PTR_ERR(idata->regulator);
+	idata->regulator = devm_regulator_get_optional(dev, "power");
+	if (IS_ERR(idata->regulator)) {
+		if (PTR_ERR(idata->regulator) != -ENODEV)
+			return dev_err_probe(dev, PTR_ERR(idata->regulator),
+					     "failed to get power supply\n");
+		idata->regulator = NULL;
+	}
 
 	idata->rc = devm_rc_allocate_device(&spi->dev, RC_DRIVER_IR_RAW_TX);
 	if (!idata->rc)
